@@ -32,3 +32,5 @@ for e in range(args.num_epochs):
         if b % 100 == 0 or 1==1:
             print('batches %d, loss %g' % (b, loss_value))
             print("Time elpased {} s".format(str(round(time.time() - tic, 2))))
+
+    model.save_weights('lstm_validator/checkpoint')

@@ -4,7 +4,7 @@ from utils import vectorization
 from config import *
 
 if args.action == 'train':
-    args.b == 0
+    args.b = 0
 
 def expand(x, dim, N):
     return tf.concat([tf.expand_dims(x, dim) for _ in range(N)], dim)
