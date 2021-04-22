@@ -29,7 +29,7 @@ for e in range(args.num_epochs):
 
         grads = tape.gradient(loss_value, model.trainable_weights)
         optimizer.apply_gradients(zip(grads, model.trainable_weights))
-        if b % 100 == 0 or 1==1:
+        if b % 100 == 0:
             print('batches %d, loss %g' % (b, loss_value))
             print("Time elpased {} s".format(str(round(time.time() - tic, 2))))
 
