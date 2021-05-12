@@ -3,13 +3,13 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('--mode', type=str, default='synthesis',
                     help='predict or synthesis')
-parser.add_argument('--batch_size', type=int, default=50,
+parser.add_argument('--batch_size', type=int, default=300,
                     help='minibatch size')
 parser.add_argument('--chars', type=str, default='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz ',
                     help='chars')
-parser.add_argument('--num_epochs', type=int, default=100,
+parser.add_argument('--num_epochs', type=int, default=200,
                     help='num of epochs')
-parser.add_argument('--T', type=int, default=200,
+parser.add_argument('--T', type=int, default=100,
                     help='RNN sequence length')
 parser.add_argument('--points_per_char', type=int, default=25,
                     help='points per char (appr.)')

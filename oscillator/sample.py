@@ -3,21 +3,14 @@ import numpy as np
 from utils import *
 from config import *
 
-import tensorflow as tf
 from tensorflow.keras import backend as K
 from tensorflow.keras.layers import Dense, RNN
 from tensorflow.keras.activations import tanh
-import numpy as np
 from tensorflow import keras
 
 from utils import vectorization
 from config import *
 
-import tensorflow as tf
-import keras
-from keras import backend as K
-from keras.layers import Dense, RNN
-from keras.activations import tanh
 
 class FF(keras.layers.Layer):
 
@@ -93,29 +86,28 @@ class FFOsc(keras.layers.Layer):
     return output[:, 1:, :], return_states
 
 
+
 def expand(x, dim, N):
     return tf.concat([tf.expand_dims(x, dim) for _ in range(N)], dim)
 
 
 data_loader = DataLoader(args.batch_size, args.T, args.data_scale,
                          chars=args.chars, points_per_char=args.points_per_char)
-str = 'how are you?'
+str1 = 'y'
 
-args.U = len(str)
+args.U = len(str1)
 args.c_dimension = len(data_loader.chars) + 1
 args.T = 1
 args.batch_size = 1
 args.action = 'sample'
 
-
 class SynthesisNet(tf.keras.Model):
 
     def __init__(self):
         super(SynthesisNet, self).__init__()
-        self.rnn1 = RNN(FF(args.rnn_state_size), return_state=True)
-        self.rnn2 = RNN(FF(args.rnn_state_size), return_state=True)
-        self.osc = FFOsc(args.rnn_state_size)
-
+        self.rnn1 = tf.keras.layers.RNN(FF(args.rnn_state_size), return_state=True)
+        self.rnn2 = tf.keras.layers.RNN(FF(args.rnn_state_size), return_state=True)
+        self.ffosc = FFOsc(args.rnn_state_size)
         self.window_layer = tf.keras.layers.Dense(args.K * 3)
         self.linear = tf.keras.layers.Dense(1 + args.M * 6)
 
@@ -126,7 +118,6 @@ class SynthesisNet(tf.keras.Model):
         kappa_prev = init_kappa
 
         u = expand(expand(np.array([i for i in range(args.U)], dtype=np.float32), 0, args.K), 0, args.batch_size)
-
         rnn_1_out, rnn_1_h = self.rnn1(tf.concat([x, w], 2), (rnn_1_h))
         k_gaussian = self.window_layer(rnn_1_out)
         alpha_hat, beta_hat, kappa_hat = tf.split(k_gaussian, 3, 1)
@@ -149,7 +140,7 @@ class SynthesisNet(tf.keras.Model):
 
         rnn_2_reshaped = tf.keras.layers.Reshape((1,
                                                   rnn_2_out.shape[1]))(rnn_2_out)
-        osc_out, osc_h = self.osc(rnn_2_reshaped, osc_h)
+        osc_out, osc_h = self.ffosc(rnn_2_reshaped, osc_h)
         output_list.append(osc_out)
 
         self_rnn_1_h = rnn_1_h
@@ -185,7 +176,6 @@ class SynthesisNet(tf.keras.Model):
 model = SynthesisNet()
 model.load_weights('osc/checkpoint')
 
-
 def sample(length, input_str=None):
 
     x = tf.zeros((1, 1, 2))
@@ -216,7 +206,6 @@ def sample(length, input_str=None):
          sigma1_a, sigma2_a, rho_a, rnn_1_h,
          rnn_2_h, osc_h, w, phi, kappa) = model(x, c_vec, rnn_1_h, rnn_2_h,
                                                 osc_h, w, kappa)
-
         for ot in range(5):
             
             end_of_stroke = end_of_stroke_a[ot:ot+1]
@@ -267,6 +256,6 @@ def sample(length, input_str=None):
     return strokes
 
 
-str_vec = vectorization(str, data_loader.char_to_indices)
-strokes = sample(len(str) * args.points_per_char, input_str=str_vec)
+str_vec = vectorization(str1, data_loader.char_to_indices)
+strokes = sample(len(str1) * args.points_per_char, input_str=str_vec)
 draw_strokes_random_color(strokes, factor=0.1, svg_filename='sample' + '.normal.svg')

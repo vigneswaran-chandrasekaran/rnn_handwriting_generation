@@ -98,7 +98,7 @@ def expand(x, dim, N):
 
 @tf.function
 def prepare(x):
-  return tf.gather(x, [i for i in range(0, x.shape[1], 5)], axis=1)
+  return tf.gather(x, [i for i in range(0, x.shape[0], 5)], axis=0)
 
 class Model(tf.keras.Model):
 
@@ -123,16 +123,17 @@ class Model(tf.keras.Model):
                            args.rnn_state_size)) for _ in range(4)]
         init_kappa = tf.zeros([args.batch_size, args.K, 1])
         init_w = tf.zeros([args.batch_size, 1, args.c_dimension])
-
         output_list = []
         w = init_w
         kappa_prev = init_kappa
 
         u = expand(expand(np.array([i for i in range(args.U)], dtype=np.float32), 0, args.K), 0, args.batch_size)
-        x = tf.split(x, args.T, 1)
+        x = tf.split(x, args.T//5, 1)
 
         for t in range(args.T//5):
+            
             rnn_1_out, rnn_1_h = self.rnn1(tf.concat([x[t], w], 2), (rnn_1_h))
+
             k_gaussian = self.window_layer(rnn_1_out)
             alpha_hat, beta_hat, kappa_hat = tf.split(k_gaussian, 3, 1)
             alpha = tf.expand_dims(tf.exp(alpha_hat), 2)

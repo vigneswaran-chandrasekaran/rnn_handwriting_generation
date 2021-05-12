@@ -15,7 +15,7 @@ args.c_dimension = len(data_loader.chars) + 1
 model = m.Model()
 optimizer = tf.keras.optimizers.Adam(learning_rate=args.learning_rate)
 loss_fn = m.compute_custom_loss
-#model.load_weights('osc/checkpoint')
+model.load_weights('osc/checkpoint')
 
 def train_step(x, c_vec, y):
     with tf.GradientTape() as tape:
